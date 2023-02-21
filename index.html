@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Tower of Olympia</title>
+    </head>
+    <body>
+        <script>
+            function displayTime() {
+                var element = document.getElementById('timer');
+                var now = new Date();
+                element.innerHTML = now.toString();
+                var floors = getTowerFloors(now);
+                for (const floor of floors) {
+                    document.getElementById(floor['kind']).innerHTML=floor['floor'];
+                }
+                setTimeout(displayTime, 1000);
+            }
+            window.onload = displayTime;
+            </script>
+        <h2>
+            Current Time:
+            <span id="timer"></span>
+        </h2>
+        <p>
+            Selene: <span id="selene"></span>
+            <br>
+            Eos: <span id="eos"></span>
+            <br>
+            Oceanus: <span id="oceanus"></span>
+            <br>
+            Themis: <span id="themis"></span>
+            <br>
+            Prometheus: <span id="prometheus"></span>
+        </p>
+        <script src="tower-timer.js"></script>
+    </body>
+</html>
