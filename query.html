@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Tower of Olympia: Query</title>
+    </head>
+    <body>
+        <script>
+            function displayTowerFloors(time) {
+                var floors = getTowerFloors(time);
+                for (const floor of floors) {
+                    document.getElementById(floor['kind']).innerHTML=floor['floor'];
+                }
+            }
+            function queryFloors() {
+                let query = document.getElementById('query');
+                displayTowerFloors(new Date(query.value));
+            }
+        </script>
+        <p>Choose a time to query:</p>
+        <input type="datetime-local" id="query"></input>
+        <button onclick="queryFloors()">Query</button>
+        <p>
+            Selene: <span id="selene"></span>
+            <br>
+            Eos: <span id="eos"></span>
+            <br>
+            Oceanus: <span id="oceanus"></span>
+            <br>
+            Themis: <span id="themis"></span>
+            <br>
+            Prometheus: <span id="prometheus"></span>
+        </p>
+        <script src="tower-timer.js"></script>
+    </body>
+</html>
