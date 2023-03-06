@@ -1,11 +1,9 @@
 # Orna Tower Timer
 
+Github Page about the status of the Tower of Olympia
+
 ## Main Page
 
-[link_cf](https://tower.fqegg.top)
+[View](https://tower.fqegg.top)
 
-[link_page](https://67au.github.io/Orna-Tower-Timer)
-
-## Query Page
-
-[link_cf](https://tower.fqegg.top/query)
+[View](https://67au.github.io/Orna-Tower-Timer)
