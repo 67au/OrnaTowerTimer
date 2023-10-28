@@ -1,5 +1,5 @@
 <template>
-	<header class="app-header" :style="{ zIndex: Context.zIndex }">		
+	<header class="app-header" :style="{ zIndex: Context.zIndex-1 }">		
 	<var-app-bar :title=title elevation>
 		<template #right>
 			<var-button color="transparent" text-color="#fff" text @click="toggleTheme" round>
@@ -14,19 +14,22 @@
 import { ref, defineComponent } from 'vue'
 import { Context } from '@varlet/ui'
 import { StyleProvider, Themes } from '@varlet/ui'
+import Cookies from 'js-cookie'
 
 export default defineComponent({
     props: ['title'],
 	setup() {
-		let currentTheme = null
-		StyleProvider(currentTheme)
-		let themeIcon = ref(currentTheme ? 'weather-night' : 'white-balance-sunny')
+		let theme = Cookies.get('theme') == 'dark';
+		let currentTheme = theme ? Themes.dark : null;
+		StyleProvider(currentTheme);
+		let themeIcon = ref(currentTheme ? 'weather-night' : 'white-balance-sunny');
 		function toggleTheme() {
-			currentTheme = currentTheme ? null : Themes.dark
-			StyleProvider(currentTheme)
+			currentTheme = currentTheme ? null : Themes.dark;
+			StyleProvider(currentTheme);
+			Cookies.set('theme', currentTheme ? 'dark' : null)
 		}
 		function toggleIcon() {
-			themeIcon.value = themeIcon.value === 'white-balance-sunny' ? 'weather-night' : 'white-balance-sunny'
+			themeIcon.value = themeIcon.value === 'white-balance-sunny' ? 'weather-night' : 'white-balance-sunny';
 		}
 		return {
 			Context,

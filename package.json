@@ -11,6 +11,7 @@
   "dependencies": {
     "@varlet/touch-emulator": "^2.18.0",
     "@varlet/ui": "^2.18.0",
+    "js-cookie": "^3.0.5",
     "vue": "^3.3.4"
   },
   "devDependencies": {
