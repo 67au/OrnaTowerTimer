@@ -23,9 +23,11 @@ const kinds = ["selene", "eos", "oceanus", "themis", "prometheus"];
 // 35, 30, 25, 20, 50
 // Thu, 07 Dec 2023 00:00:00 GMT
 
-const baseFloors = [35, 30, 25, 20, 50]
+const baseFloors = [35, 30, 25, 20, 15]
 const baseDate = new Date(Date.UTC(2023, 11, 7, 0));
 // const baseDate = new Date(Date.UTC(2024, 0, 11, 0));
+
+const minutes35day = 35*24*60;
 
 /**
  * 计算塔层数
@@ -33,50 +35,36 @@ const baseDate = new Date(Date.UTC(2023, 11, 7, 0));
  * @param { Array<T> } floors
  */
 export function getTowerFloors(time) {
-    let minutes = Math.abs(time - baseDate) / (1000 * 60);
-    const reverseFlag = (time - baseDate) < 0
+    let minutes = Math.abs(time - baseDate) / (1000 * 60) % minutes35day;
+
+    if ((time - baseDate) < 0) {
+        minutes = (minutes35day - minutes);
+    }
 
     let day = Math.floor(minutes / (60 * 24));
     let hour = Math.floor((minutes - day * 60 * 24) / 60);
     let minute = Math.floor(minutes - day * 60 * 24 - hour * 60);
+    
+    let point = 0;
+    if (hour > 0) {point++};
+    if (hour > 4) {point++};
+    if (hour > 9) {point++};
+    if (hour > 14) {point = point + 2};
+    if (hour == 15 && minute <= 35) {point--};
+    if (hour > 19) {point++};
 
-    const prometheus_15 = day % 35 == 0 && (hour < 1);
-
-    if (reverseFlag) {
-        day = (35 - day) % 35;
-        minute = (60 - minute) % 60;
-        hour = (24 - hour) - (minute>0?1:0);
-    }
-
-    let dayFloor = reverseFlag?-6:0;
-    if (hour > 0) {dayFloor++};
-    if (hour > 4) {dayFloor++};
-    if (hour > 9) {dayFloor++};
-    if (hour > 14) {dayFloor = dayFloor + 2};
-    if (hour == 15 && minute <= 35) {dayFloor--};
-    if (hour > 19) {dayFloor++};
-
-    const floors = kinds.map((elem, index) => {
-        let towerFloor = (Math.abs(baseFloors[index] - 15 + day * 6) + dayFloor) % 35 + 15;
-        towerFloor = towerFloor>15?towerFloor:50;
-        if (prometheus_15 && elem == 'prometheus') {
-            return {
-                'kind': elem,
-                'floor': 15,
-            }
-        }
+    return kinds.map((elem, index) => {
+        const towerFloor = (Math.abs(baseFloors[index] - 15 + day * 6) + point) % 35 + 15;
         return {
             'kind': elem,
-            'floor': towerFloor<48?towerFloor:50,
+            'floor': (towerFloor>=48 || (towerFloor == 15 && !(day % 35 == 0 && hour == 0)))?50:towerFloor,
         }
     });
-
-    return floors;
 }
 
-const checkpoints = [[0,0], [1,0],[5,0],[10,0],[15,0],[15,36],[20,0]];
+const checkpoints = [[0,0],[1,0],[5,0],[10,0],[15,0],[15,36],[20,0]];
 
-export function getTowerFloorsInNextTwoDays(time) {
+export function getTowerFloorsInNextDays(time, n=2) {
     const hour = time.getUTCHours();
     const minute = time.getUTCMinutes();
 
@@ -90,43 +78,27 @@ export function getTowerFloorsInNextTwoDays(time) {
     if (hour == 15 && minute <= 35) {point--};
     if (hour > 19) {point++};
 
-    const DayOne = new Date(time);
-    DayOne.setUTCSeconds(0);
-    DayOne.setUTCMilliseconds(0);
-    const DayTwo = new Date(DayOne);
-    DayTwo.setUTCDate(DayTwo.getUTCDate()+1);
-    const DayThree = new Date(DayTwo);
-    DayThree.setUTCDate(DayThree.getUTCDate()+1);
-    return checkpoints.slice(point+1, 7).map((timeTuple) => {
-        DayOne.setUTCHours(timeTuple[0]);
-        DayOne.setUTCMinutes(timeTuple[1]);
+    point += 1;
+
+    const days = checkpoints.slice(point).concat(
+        checkpoints.slice(0, point),
+        checkpoints.slice(point),
+        checkpoints.slice(0, point)
+    )
+
+    return days.map((timeTuple, index) => {
+        const dayDelta = Math.floor((index + point) / 7);
+        if (timeTuple[0] == 0 && (35 - (day + dayDelta)) % 35 != 0) {
+            return false
+        }
+        let dayOne = new Date(time);
+        dayOne.setUTCSeconds(0);
+        dayOne.setUTCMilliseconds(0);
+        dayOne.setUTCHours(timeTuple[0] + 24 * dayDelta);
+        dayOne.setUTCMinutes(timeTuple[1]);
         return {
-            'time': new Date(DayOne),
-            'floors': getTowerFloors(DayOne),
+            'time': new Date(dayOne),
+            'floors': getTowerFloors(dayOne),
         }
-    }).concat(checkpoints.map((timeTuple) => {
-        if (timeTuple[0] == 0) {
-            if ((day+1) % 35 != 0) {
-                return false
-            }
-        }
-        DayTwo.setUTCHours(timeTuple[0]);
-        DayTwo.setUTCMinutes(timeTuple[1]);
-        return {
-            'time': new Date(DayTwo),
-            'floors': getTowerFloors(DayTwo),
-        }
-    }), checkpoints.slice(0, point+1).map((timeTuple) => {
-        DayThree.setUTCHours(timeTuple[0]);
-        DayThree.setUTCMinutes(timeTuple[1]);
-        if (timeTuple[0] == 0) {
-            if ((day+2) % 35 != 0) {
-                return false
-            }
-        }
-        return {
-            'time': new Date(DayThree),
-            'floors': getTowerFloors(DayThree),
-        }
-    })).filter((e) => e != false)
+    }).filter((e) => e != false)
 }

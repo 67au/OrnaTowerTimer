@@ -51,9 +51,11 @@
                 <th>{{ displayTime }}</th>
                 <th>{{ tower.floor }}</th>
               </tr>
-              <tr v-for="towerDay in towerFloorsInNextTwoDays">
-                <th>{{ towerDay['time'].toLocaleString() }}</th>
-                <th>{{ towerDay['floors'][index]['floor'] }}</th>
+              <tr v-for="towerDay in towerFloorsInNextDays">
+                <template v-if="!(towerDay['floors'][index]['kind'] != 'prometheus' && towerDay['time'].getUTCHours() == 0)">
+                  <th>{{ towerDay['time'].toLocaleString() }}</th>
+                  <th>{{ towerDay['floors'][index]['floor'] }}</th>
+                </template>
               </tr>
             </tbody>
           </var-table>
@@ -64,21 +66,21 @@
 </template>
 
 <script>
-import { getTowerFloors, getTowerFloorsInNextTwoDays } from './plugins/tower-timer.js'
+import { getTowerFloors, getTowerFloorsInNextDays } from './plugins/tower-timer.js'
 
 
 export default {
   mounted: function () {
     this.towerFloors = getTowerFloors(this.time);
     this.towerFloating = new Array(this.towerFloors.length).fill(false);
-    this.towerFloorsInNextTwoDays = getTowerFloorsInNextTwoDays(this.time);
+    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.time);
   },
   data() {
     return {
       time: new Date(),
       towerFloors: [],
       towerFloating: [],
-      towerFloorsInNextTwoDays: [],
+      towerFloorsInNextDays: [],
     }
   },
   computed: {
