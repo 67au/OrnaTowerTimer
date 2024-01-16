@@ -64,6 +64,13 @@ export function getTowerFloors(time) {
 
 const checkpoints = [[0,0],[1,0],[5,0],[10,0],[15,0],[15,36],[20,0]];
 
+function* repeat(point, n) {
+    for (const _ of Array(n).keys()) {
+        yield* checkpoints.slice(point);
+        yield* checkpoints.slice(0, point);
+    }
+}
+
 export function getTowerFloorsInNextDays(time, n=2) {
     const hour = time.getUTCHours();
     const minute = time.getUTCMinutes();
@@ -80,13 +87,9 @@ export function getTowerFloorsInNextDays(time, n=2) {
 
     point += 1;
 
-    const days = checkpoints.slice(point).concat(
-        checkpoints.slice(0, point),
-        checkpoints.slice(point),
-        checkpoints.slice(0, point)
-    )
+    const days = repeat(point, n);
 
-    return days.map((timeTuple, index) => {
+    return Array.from(days).map((timeTuple, index) => {
         const dayDelta = Math.floor((index + point) / 7);
         if (timeTuple[0] == 0 && (35 - (day + dayDelta)) % 35 != 0) {
             return false
