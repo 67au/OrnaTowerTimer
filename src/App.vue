@@ -6,28 +6,26 @@
         @click="towerFloating[index] = true">
         <template #image>
           <var-image :round="false" :src="'https://playorna.com/static/img/bosses/titan_' + tower.kind + '.png'"
-            width="96px" height="96px" fit="contain" class="superboss" />
+            width="100px" height="100px" fit="contain" class="superboss" />
         </template>
         <template #title>
           <div class="card-title">
-            <var-space justify="space-between">
-              {{ tower.kind.charAt(0).toUpperCase() + tower.kind.slice(1) }}
-              <var-chip :round="false" type="danger" v-if="tower.floor >= 45">
-                {{ tower.floor }}
-              </var-chip>
-              <var-chip :round="false" type="default" v-if="tower.floor < 45">
-                {{ tower.floor }}
-              </var-chip>
-            </var-space>
+            {{ tower.kind.charAt(0).toUpperCase() + tower.kind.slice(1) }}
+          </div>
+        </template>
+        <template #subtitle>
+          <div class="card-subtitle">
+            {{ names[index] }}
           </div>
         </template>
         <template #description>
+          <var-divider />
           <div class="card-description">
-            <var-divider />
+            <var-progress :type="tower.floor >= 45 ? 'danger' : 'success'" :line-width="8"
+              :value="towerProgress[index]" label label-class="progress-label">
+              {{ tower.floor }}
+            </var-progress>
           </div>
-        </template>
-        <template #extra>
-          <div style="font-size: 13px;">{{ displayTime }}</div>
         </template>
       </var-card>
     </var-space>
@@ -52,7 +50,8 @@
                 <th>{{ tower.floor }}</th>
               </tr>
               <tr v-for="towerDay in towerFloorsInNextDays">
-                <template v-if="!(towerDay['floors'][index]['kind'] != 'prometheus' && towerDay['time'].getUTCHours() == 0)">
+                <template
+                  v-if="!(towerDay['floors'][index]['kind'] != 'prometheus' && towerDay['time'].getUTCHours() == 0)">
                   <th>{{ towerDay['time'].toLocaleString() }}</th>
                   <th>{{ towerDay['floors'][index]['floor'] }}</th>
                 </template>
@@ -65,19 +64,23 @@
   </div>
 </template>
 
-<script>
-import { getTowerFloors, getTowerFloorsInNextDays } from './plugins/tower-timer.js'
+<script setup>
+const names = ['塞勒涅', '厄俄斯', '俄刻阿诺斯', '忒弥斯', '普罗米修斯'];
+</script>
 
+<script>
+import { getTowerFloors, getTowerFloorsInNextDays } from './plugins/tower-timer.js';
 
 export default {
   mounted: function () {
     this.towerFloors = getTowerFloors(this.time);
     this.towerFloating = new Array(this.towerFloors.length).fill(false);
-    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.time);
+    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.time, this.towerDays);
   },
   data() {
     return {
       time: new Date(),
+      towerDays: 7,
       towerFloors: [],
       towerFloating: [],
       towerFloorsInNextDays: [],
@@ -85,8 +88,13 @@ export default {
   },
   computed: {
     displayTime() {
-      return this.time.toLocaleString()
-    }
+      return this.time.toLocaleString();
+    },
+    towerProgress() {
+      return this.towerFloors.map((tower) => {
+        return Math.floor((tower.floor - 15 + 1) * 100 / 36);
+      });
+    },
   }
 }
 </script>
@@ -111,24 +119,33 @@ body {
 }
 
 .card {
-  height: 96px;
-  width: 310px;
+  height: 100px;
+  width: 262px;
   --card-footer-bottom: 50px;
   --card-footer-right: 9px;
 }
 
 .card-title {
   color: var(--card-title-color);
-  font-size: 20px;
+  font-size: var(--card-title-font-size);
   padding: var(--card-title-padding);
-  margin: 6px 0;
+}
+
+.card-subtitle {
+  color: var(--card-subtitle-color);
+  font-size: var(--card-subtitle-font-size);
+  padding: var(--card-subtitle-padding);
 }
 
 .card-description {
   color: var(--card-description-color);
   font-size: var(--card-description-font-size);
   padding: var(--card-description-padding);
-  margin: 27px 0 0 0;
+  margin: -3px 0;
+}
+
+.progress-label {
+  font-size: 20px;
 }
 
 .popup-content {
@@ -142,7 +159,8 @@ body {
 
 .superboss {
   background: transparent url("https://playorna.com/static/img/fx/superboss.png") 50% 50% no-repeat;
-  background-size: 140%;
+  background-size: 130%;
+  padding: 2px 2px 2px 2px;
   image-rendering: pixelated;
   background-color: #a0a0a0a0;
 }
