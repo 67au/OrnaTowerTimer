@@ -1,0 +1,29 @@
+{
+    "en": {
+        "title": "Tower of Olympia",
+        "yaco": "Codex YACO",
+        "selene": "Selene",
+        "eos": "Eos",
+        "oceanus": "Oceanus",
+        "themis": "Themis",
+        "prometheus": "Prometheus"
+    },
+    "zh-hans": {
+        "title": "奥林匹亚之塔",
+        "yaco": "图鉴 YACO",
+        "selene": "塞勒涅",
+        "eos": "厄俄斯",
+        "oceanus": "俄刻阿诺斯",
+        "themis": "忒弥斯",
+        "prometheus": "普罗米修斯"
+    },
+    "zh-hant": {
+        "title": "奧林匹亞之塔",
+        "yaco": "圖鑒 YACO",
+        "selene": "塞勒涅",
+        "eos": "愛奧斯",
+        "oceanus": "奧克亞諾斯",
+        "themis": "泰美斯",
+        "prometheus": "普羅米修斯"
+    }
+}
