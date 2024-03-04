@@ -1,42 +1,35 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import { StyleProvider, Themes } from '@varlet/ui'
-
-import { store } from '@/store'
+import { localStorage } from '@/plugins/storage'
+import { StyleProvider, Themes as ComponentsThemes, type StyleVars } from "@varlet/ui";
 
 const show = ref(false);
 
-const suppoertedThemes = {
-	'md2-light': {},
-	'md2-dark': Themes.dark,
-	'md3-light': Themes.md3Light,
-	'md3-dark': Themes.md3Dark,
-};
-
-store.state.theme = store.state.theme || 'md2-dark';
-
-function addCustomTheme() {
-  if (store.state.theme.endsWith('dark')) {
-    suppoertedThemes[store.state.theme]['--highlight-color'] = 'var(--highlight-color-dark)'
-  } else {
-    suppoertedThemes[store.state.theme]['--highlight-color'] = 'var(--highlight-color-light)'
-  }
+interface Themes {
+  [Key: string]: StyleVars
 }
 
-addCustomTheme()
-StyleProvider(suppoertedThemes[store.state.theme]);
+const suppoertedThemes: Themes = {
+	'md2-light': {},
+	'md2-dark': ComponentsThemes.dark,
+	'md3-light': ComponentsThemes.md3Light,
+	'md3-dark': ComponentsThemes.md3Dark,
+};
 
-function getActiveStyles(theme) {
+const currentTheme = localStorage.get('theme') || 'md2-dark';
+
+StyleProvider(suppoertedThemes[currentTheme]);
+
+function getActiveStyles(theme: string) {
 	return {
-		color: store.state.theme === theme ? 'var(--color-primary)' : undefined,
-		backgroundColor: store.state.theme === theme ? 'var(--app-cell-active-background)' : undefined
+		color: currentTheme === theme ? 'var(--color-primary)' : undefined,
+		backgroundColor: currentTheme === theme ? 'var(--app-cell-active-background)' : undefined
 	}
 }
 
-function handleCellClick(theme) {
-	store.state.theme = theme;
-  addCustomTheme()
-	StyleProvider(suppoertedThemes[theme]);
+function handleCellClick(theme: string) {
+	localStorage.set('theme', theme);
+  StyleProvider(suppoertedThemes[theme]);
 	show.value = false;
 }
 </script>

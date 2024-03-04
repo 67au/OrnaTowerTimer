@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppLocaleSwitch from '@/components/AppLocaleSwitch.vue';
@@ -15,12 +15,11 @@ import AppGithub from '@/components/AppGithub.vue';
         <AppGithub link="https://github.com/67au/OrnaTowerTimer" />
       </template>
     </AppHeader>
-    <component is="HomeView" />
+    <component :is="'HomeView'" />
   </div>
 </template>
 
-<script>
-
+<script lang="ts">
 export default {
   components: {
     HomeView: defineAsyncComponent(() => import('@/components/HomeView.vue')),

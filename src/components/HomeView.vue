@@ -1,6 +1,7 @@
-<script setup>
-import { store } from '@/store';
-import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer.js';
+<script setup lang="ts">
+import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer';
+import { defineComponent } from 'vue';
+import { i18n } from '@/i18n';
 </script>
 
 <template>
@@ -22,7 +23,7 @@ import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer.
         </template>
         <template #subtitle>
           <div class="titan-card-subtitle">
-            <template v-if="store.state.language === 'en'">
+            <template v-if="isEn">
               <br>
             </template>
             <template v-else>
@@ -67,7 +68,7 @@ import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer.
                   <th>{{ displayTime }}</th>
                   <th>{{ tower.floor }}</th>
                 </tr>
-                <tr v-for="towerDay in towerFloorsInNextDays">
+                <tr v-for="towerDay, day in towerFloorsInNextDays" :key="day">
                   <template
                     v-if="!(towerDay['floors'][index]['kind'] != 'prometheus' && towerDay['time'].getUTCHours() == 0)">
                     <th>{{ towerDay['time'].toLocaleString() }}</th>
@@ -83,10 +84,10 @@ import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer.
   </main>
 </template>
 
-<script>
+<script lang="ts">
 const ornaUrl = 'https://playorna.com';
 
-export default {
+export default defineComponent({
   mounted: function () {
     this.towerFloors = getTowerFloors(this.time);
     this.towerFloating = new Array(this.towerFloors.length).fill(false);
@@ -96,9 +97,9 @@ export default {
     return {
       time: new Date(),
       towerDays: 7,
-      towerFloors: [],
-      towerFloating: [],
-      towerFloorsInNextDays: [],
+      towerFloors: [] as Array<any>,
+      towerFloating: [] as Array<boolean>,
+      towerFloorsInNextDays: [] as Array<any>,
     }
   },
   computed: {
@@ -110,16 +111,19 @@ export default {
         return Math.floor((tower.floor - 15 + 1) * 100 / 36);
       });
     },
+    isEn() {
+      return i18n.global.locale.value === 'en';
+    }
   },
   methods: {
-    getTitanYAOCUrl(titan) {
+    getTitanYAOCUrl(titan: string) {
       return `https://codex.fqegg.top/#/codex/bosses/titan-${titan}/`
     },
-    getOrnaTitanIconUrl(titan) {
+    getOrnaTitanIconUrl(titan: string) {
       return `${ornaUrl}/static/img/bosses/titan_${titan}.png`
     },
   }
-}
+})
 </script>
 
 <style>
