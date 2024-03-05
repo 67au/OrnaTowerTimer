@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { localStorage } from '@/plugins/storage'
 import { StyleProvider, Themes as ComponentsThemes, type StyleVars } from "@varlet/ui";
 
@@ -16,7 +16,7 @@ const suppoertedThemes: Themes = {
 	'md3-dark': ComponentsThemes.md3Dark,
 };
 
-const currentTheme = localStorage.get('theme') || 'md2-dark';
+let currentTheme = reactive(localStorage.get('theme') || 'md2-dark');
 
 StyleProvider(suppoertedThemes[currentTheme]);
 
@@ -28,6 +28,7 @@ function getActiveStyles(theme: string) {
 }
 
 function handleCellClick(theme: string) {
+	currentTheme = theme;
 	localStorage.set('theme', theme);
   StyleProvider(suppoertedThemes[theme]);
 	show.value = false;
