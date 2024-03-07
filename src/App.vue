@@ -4,6 +4,9 @@ import AppHeader from '@/components/AppHeader.vue';
 import AppLocaleSwitch from '@/components/AppLocaleSwitch.vue';
 import AppThemeSwitch from '@/components/AppThemeSwitch.vue';
 import AppGithub from '@/components/AppGithub.vue';
+import { useDark } from '@/styles';
+
+useDark();
 </script>
 
 <template>

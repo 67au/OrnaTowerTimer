@@ -1,36 +1,18 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { localStorage } from '@/plugins/storage'
-import { StyleProvider, Themes as ComponentsThemes, type StyleVars } from "@varlet/ui";
+import { ref } from 'vue'
+import { currentTheme, setTheme } from '@/styles';
 
 const show = ref(false);
 
-interface Themes {
-  [Key: string]: StyleVars
-}
-
-const suppoertedThemes: Themes = {
-	'md2-light': {},
-	'md2-dark': ComponentsThemes.dark,
-	'md3-light': ComponentsThemes.md3Light,
-	'md3-dark': ComponentsThemes.md3Dark,
-};
-
-let currentTheme = reactive(localStorage.get('theme') || 'md2-dark');
-
-StyleProvider(suppoertedThemes[currentTheme]);
-
 function getActiveStyles(theme: string) {
 	return {
-		color: currentTheme === theme ? 'var(--color-primary)' : undefined,
-		backgroundColor: currentTheme === theme ? 'var(--app-cell-active-background)' : undefined
+		color: currentTheme.value === theme ? 'var(--color-primary)' : undefined,
+		backgroundColor: currentTheme.value === theme ? 'var(--app-cell-active-background)' : undefined
 	}
 }
 
 function handleCellClick(theme: string) {
-	currentTheme = theme;
-	localStorage.set('theme', theme);
-  StyleProvider(suppoertedThemes[theme]);
+	setTheme(theme);
 	show.value = false;
 }
 </script>
