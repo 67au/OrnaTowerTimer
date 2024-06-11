@@ -13,13 +13,16 @@ import { i18n } from '@/i18n';
           <var-image class="titan" :width="100" :height="100" :src="getOrnaTitanIconUrl(tower.kind)" />
         </template>
         <template #title>
+        <var-space justify="space-between">
           <div class="titan-card-title">
-            <var-space justify="space-between">
-              <span>
-                {{ $t(tower.kind) }}
-              </span>
-            </var-space>
+            {{ $t(tower.kind) }}
           </div>
+          <var-space justify="flex-end" style="transform: translateY(-6px);">
+            <var-chip size="mini" :round="false">
+              <var-icon name="magnify" size="14" />
+            </var-chip>
+          </var-space>
+          </var-space>
         </template>
         <template #subtitle>
           <div class="titan-card-subtitle">
@@ -44,19 +47,24 @@ import { i18n } from '@/i18n';
         </template>
       </var-card>
       <template v-for="tower, index in towerFloors" :key="tower.kind">
-        <var-overlay v-model:show="towerFloating[index]" :lock-scroll="true">
+        <var-popup :default-style="false" v-model:show="towerFloating[index]" :lock-scroll="true">
           <var-paper class="popup-content">
-            <var-space style="padding-bottom: 4px;" justify="space-between" align="center">
+            <var-space style="padding-bottom: 8px;" justify="space-between" align="center">
               <div style="font-size: 18px; ">
                 {{ $t(tower.kind) }}
               </div>
+              <var-space justify="flex-end" size="small">
                 <var-link :href="getTitanYAOCUrl(tower.kind)" target="_blank" underline="none">
-                <var-button size="small" type="primary">
-                  {{ $t('yaco') }}
-                </var-button>
+                  <var-button type="info" size="mini" round>
+                    <var-icon name="information-outline" size="16" />
+                  </var-button>
                 </var-link>
+                <var-button type="danger" size="mini" round @click="towerFloating[index] = false">
+                  <var-icon name="window-close" size="16" />
+                </var-button>
+              </var-space>
             </var-space>
-            <var-table :elevation="3" class="timer-table">
+            <var-table :elevation="3" class="timer-table" scroller-height="75vh">
               <thead>
                 <tr>
                   <th>Time</th>
@@ -78,7 +86,7 @@ import { i18n } from '@/i18n';
               </tbody>
             </var-table>
           </var-paper>
-        </var-overlay>
+        </var-popup>
       </template>
     </div>
   </main>
@@ -142,10 +150,8 @@ export default defineComponent({
 
 .titan-card-title {
   color: var(--card-title-color);
-  /* font-size: var(--card-title-font-size); */
   font-size: 18px;
   padding: var(--card-title-padding);
-  /* margin: var(--card-title-margin); */
   margin: 8px 0 0 0;
 }
 
@@ -229,7 +235,6 @@ export default defineComponent({
 
 .timer-table {
   overflow-y: auto;
-  max-height: 75vh;
   white-space: nowrap;
 }
 

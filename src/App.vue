@@ -25,7 +25,7 @@ useDark();
 <script lang="ts">
 export default {
   components: {
-    HomeView: defineAsyncComponent(() => import('@/components/HomeView.vue')),
+    HomeView: defineAsyncComponent(() => import('@/views/HomeView.vue')),
   },
 }
 </script>
