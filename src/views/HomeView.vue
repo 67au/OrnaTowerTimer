@@ -13,15 +13,15 @@ import { i18n } from '@/i18n';
           <var-image class="titan" :width="100" :height="100" :src="getOrnaTitanIconUrl(tower.kind)" />
         </template>
         <template #title>
-        <var-space justify="space-between">
-          <div class="titan-card-title">
-            {{ $t(tower.kind) }}
-          </div>
-          <var-space justify="flex-end" style="transform: translateY(-6px);">
-            <var-chip size="mini" :round="false">
-              <var-icon name="magnify" size="14" />
-            </var-chip>
-          </var-space>
+          <var-space justify="space-between" size="0">
+            <div class="titan-card-title">
+              {{ $t(tower.kind) }}
+            </div>
+            <var-space justify="flex-end" style="margin-right: 6px; position: relative;">
+              <var-chip size="mini">
+                <var-icon name="calendar-month-outline" size="16"/>
+              </var-chip>
+            </var-space>
           </var-space>
         </template>
         <template #subtitle>
@@ -51,6 +51,7 @@ import { i18n } from '@/i18n';
           <var-paper class="popup-content">
             <var-space style="padding-bottom: 8px;" justify="space-between" align="center">
               <div style="font-size: 18px; ">
+              <var-icon name="calendar-month-outline"/>
                 {{ $t(tower.kind) }}
               </div>
               <var-space justify="flex-end" size="small">
