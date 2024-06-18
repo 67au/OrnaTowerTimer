@@ -19,7 +19,7 @@ export default defineConfig({
       manifest: {
         name: 'Tower of Olympia: OrnaRPG',
         short_name: 'Orna Tower',
-        description: 'Schedule for the Tower of Olympi',
+        description: 'Schedule for the Tower of Olympia',
         theme_color: '#ffffff',
         icons: [192, 256, 384, 512].map((x) => ({
             src: '/favicon.svg',
@@ -32,6 +32,22 @@ export default defineConfig({
         navigateFallbackDenylist: [
           // cloudflare cdn trace
           /^\/cdn-cgi\/trace/
+        ],
+        runtimeCaching: [
+          {
+            urlPattern: new RegExp(`^https://playorna.com/static/`),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'static-images-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 120 // <== 120 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
         ]
       }
     }),
