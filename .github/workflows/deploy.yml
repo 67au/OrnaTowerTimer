@@ -9,26 +9,17 @@ on:
     
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'yarn'
       - name: Install dependencies
         run: |
@@ -36,13 +27,21 @@ jobs:
       - name: Build
         run: |
           yarn build
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          # Upload entire repository
-          path: './dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+          apiToken: ${{ secrets.CF_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy ./dist --project-name=${{ vars.CF_PAGES_NAME }}
+      - name: Purge CloudFlare Cache
+        if: vars.PURGE_CF_CACHE == '1'
+        run: |
+          curl --request POST \
+            --url https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/purge_cache \
+            --header 'Content-Type: application/json' \
+            --header 'Authorization: Bearer ${{ secrets.CF_TOKEN }}' \
+            --data '{
+              "files": [
+                "${{ secrets.CF_CODEX_URL }}"
+              ]
+            }'
