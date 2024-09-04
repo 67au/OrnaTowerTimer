@@ -8,6 +8,7 @@ import components from 'unplugin-vue-components/vite'
 import autoImport from 'unplugin-auto-import/vite'
 import { VarletImportResolver } from '@varlet/import-resolver'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import UnoCSS from 'unocss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
@@ -60,7 +61,8 @@ export default defineConfig({
     }),
     VueI18nPlugin({
       include: resolve(dirname(fileURLToPath(import.meta.url)), './src/i18n/locale.json')
-    })
+    }),
+    UnoCSS()
   ],
   resolve: {
     alias: {

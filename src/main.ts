@@ -5,7 +5,7 @@ import '@varlet/touch-emulator'
 
 import { i18n } from '@/i18n'
 import App from './App.vue'
-
+import 'virtual:uno.css'
 
 const app = createApp(App)
 
