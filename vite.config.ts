@@ -56,7 +56,8 @@ export default defineConfig({
       resolvers: [VarletImportResolver()]
     }),
     autoImport({
-      imports: ['vue'],
+      imports: ['vue', 'vue-router'],
+      eslintrc: { enabled: true },
       resolvers: [VarletImportResolver({ autoImport: true })]
     }),
     VueI18nPlugin({

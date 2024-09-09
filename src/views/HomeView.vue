@@ -1,127 +1,170 @@
 <script setup lang="ts">
-import { getTowerFloors, getTowerFloorsInNextDays } from '@/plugins/tower-timer';
-import { defineComponent } from 'vue';
-import { i18n } from '@/i18n';
+import {
+  getTowerFloors,
+  getTowerFloorsInNextDays,
+  type Floors,
+  type Floor,
+  type CheckPointFloors
+} from '@/plugins/tower-timer'
+import { defineComponent } from 'vue'
+import { i18n } from '@/i18n'
+import { store } from '@/stores'
 </script>
 
 <template>
-  <main>
-    <div class="container">
-      <var-card class="card" v-for="tower, index in towerFloors" :key="tower.kind" layout="row" elevation="3" ripple
-        @click="towerFloating[index] = true">
-        <template #image>
-          <var-image class="titan" :width="100" :height="100" :src="getOrnaTitanIconUrl(tower.kind)" />
+  <var-card
+    class="card"
+    v-for="(tower, index) in towerFloors"
+    :key="tower.kind"
+    layout="row"
+    elevation="3"
+    ripple
+    @click="towerFloating[index] = true"
+  >
+    <template #image>
+      <var-image class="titan" :width="100" :height="100" :src="getOrnaTitanIconUrl(tower.kind)" />
+    </template>
+    <template #title>
+      <var-space justify="space-between" size="0">
+        <div class="titan-card-title">
+          {{ $t(tower.kind) }}
+        </div>
+        <var-space justify="flex-end" class="pt-0.5 pr-1.5 relative">
+          <var-chip size="mini">
+            <var-icon name="calendar-month-outline" size="16" />
+          </var-chip>
+        </var-space>
+      </var-space>
+    </template>
+    <template #subtitle>
+      <div class="titan-card-subtitle">
+        <template v-if="isEn">
+          <br />
         </template>
-        <template #title>
-          <var-space justify="space-between" size="0">
-            <div class="titan-card-title">
-              {{ $t(tower.kind) }}
-            </div>
-            <var-space justify="flex-end" style="margin-right: 6px; position: relative;">
-              <var-chip size="mini">
-                <var-icon name="calendar-month-outline" size="16"/>
-              </var-chip>
-            </var-space>
+        <template v-else>
+          {{ firstUpperCase(tower.kind) }}
+        </template>
+      </div>
+    </template>
+    <template #description>
+      <var-divider />
+      <div class="titan-card-description">
+        <var-progress
+          :type="tower.floor >= 45 ? 'danger' : 'success'"
+          :line-width="8"
+          :value="towerProgress[index]"
+          label
+          label-class="progress-label"
+        >
+          <div class="text-size-lg">
+            {{ tower.floor }}
+          </div>
+        </var-progress>
+      </div>
+    </template>
+  </var-card>
+  <template v-for="(tower, index) in towerFloors" :key="tower.kind">
+    <var-popup :default-style="false" v-model:show="towerFloating[index]" :lock-scroll="true">
+      <var-paper class="p-3" radius="12px">
+        <var-space class="pb-2 w-80vw max-w-sm" justify="space-between" align="center">
+          <var-chip type="primary" elevation="3">
+            <template #left>
+              <var-icon name="calendar-month-outline" />
+            </template>
+            {{ $t(tower.kind) }}
+          </var-chip>
+          <var-space justify="flex-end" size="small">
+            <var-link :href="getTitanYAOCUrl(tower.kind)" target="_blank" underline="none">
+              <var-button type="info" size="mini" round>
+                <var-icon name="information-outline" size="16" />
+              </var-button>
+            </var-link>
+            <var-button type="danger" size="mini" round @click="towerFloating[index] = false">
+              <var-icon name="window-close" size="16" />
+            </var-button>
           </var-space>
-        </template>
-        <template #subtitle>
-          <div class="titan-card-subtitle">
-            <template v-if="isEn">
-              <br>
-            </template>
-            <template v-else>
-              {{ tower.kind.charAt(0).toUpperCase() + tower.kind.slice(1) }}
-            </template>
-          </div>
-        </template>
-        <template #description>
-          <var-divider />
-          <div class="titan-card-description">
-            <var-progress :type="tower.floor >= 45 ? 'danger' : 'success'" :line-width="8" :value="towerProgress[index]"
-              label label-class="progress-label">
-              <span style="font-size: 18px;">
-                {{ tower.floor }}
-              </span>
-            </var-progress>
-          </div>
-        </template>
-      </var-card>
-      <template v-for="tower, index in towerFloors" :key="tower.kind">
-        <var-popup :default-style="false" v-model:show="towerFloating[index]" :lock-scroll="true">
-          <var-paper class="popup-content">
-            <var-space style="padding-bottom: 8px;" justify="space-between" align="center">
-              <div style="font-size: 18px; ">
-              <var-icon name="calendar-month-outline"/>
-                {{ $t(tower.kind) }}
-              </div>
-              <var-space justify="flex-end" size="small">
-                <var-link :href="getTitanYAOCUrl(tower.kind)" target="_blank" underline="none">
-                  <var-button type="info" size="mini" round>
-                    <var-icon name="information-outline" size="16" />
-                  </var-button>
-                </var-link>
-                <var-button type="danger" size="mini" round @click="towerFloating[index] = false">
-                  <var-icon name="window-close" size="16" />
-                </var-button>
-              </var-space>
-            </var-space>
-            <var-table :elevation="3" class="timer-table" scroller-height="75vh">
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Floors</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style="background: var(--color-disabled);">
-                  <th>{{ displayTime }}</th>
-                  <th>{{ tower.floor }}</th>
-                </tr>
-                <tr v-for="towerDay, day in towerFloorsInNextDays" :key="day">
-                  <template
-                    v-if="!(towerDay['floors'][index]['kind'] != 'prometheus' && towerDay['time'].getUTCHours() == 0)">
-                    <th>{{ towerDay['time'].toLocaleString() }}</th>
-                    <th>{{ towerDay['floors'][index]['floor'] }}</th>
-                  </template>
-                </tr>
-              </tbody>
-            </var-table>
-          </var-paper>
-        </var-popup>
-      </template>
-    </div>
-  </main>
+        </var-space>
+        <var-table :elevation="3" scroller-height="70vh">
+          <thead>
+            <tr class="top-0 sticky">
+              <th>Local Time</th>
+              <th>Floors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: var(--color-disabled)">
+              <th>{{ currentTime.toLocaleString() }}</th>
+              <th>{{ tower.floor }}</th>
+            </tr>
+            <tr v-for="(towerDay, day) in towerFloorsInNextDays" :key="day">
+              <template
+                v-if="
+                  !(
+                    towerDay['floors'][index]['kind'] != 'prometheus' &&
+                    towerDay['time'].getUTCHours() == 0
+                  )
+                "
+              >
+                <th>{{ towerDay['time'].toLocaleString() }}</th>
+                <th>{{ towerDay['floors'][index]['floor'] }}</th>
+              </template>
+            </tr>
+          </tbody>
+        </var-table>
+      </var-paper>
+    </var-popup>
+  </template>
 </template>
 
 <script lang="ts">
-const ornaUrl = 'https://playorna.com';
+const ornaUrl = 'https://playorna.com'
 
 export default defineComponent({
-  mounted: function () {
-    this.towerFloors = getTowerFloors(this.time);
-    this.towerFloating = new Array(this.towerFloors.length).fill(false);
-    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.time, this.towerDays);
+  props: {
+    timestamp: {
+      type: Number
+    }
+  },
+  mounted() {
+    watch(
+      () => this.timestamp,
+      () => {
+        if (typeof this.timestamp === 'number') {
+          if (Number.isNaN(this.timestamp)) {
+            store.flag = 0
+            this.$router.replace({name: 'home'})
+          } else {
+            store.setTime(this.timestamp)
+          }
+        } else {
+          store.flag = 1
+        }
+      },
+      { immediate: true }
+    )
+    this.towerFloors = getTowerFloors(this.currentTime)
+    this.towerFloating = new Array(this.towerFloors.length).fill(false)
+    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.currentTime, this.towerDays)
   },
   data() {
     return {
-      time: new Date(),
       towerDays: 7,
-      towerFloors: [] as Array<any>,
+      towerFloors: [] as Floors,
       towerFloating: [] as Array<boolean>,
-      towerFloorsInNextDays: [] as Array<any>,
+      towerFloorsInNextDays: [] as Array<CheckPointFloors>
     }
   },
   computed: {
-    displayTime() {
-      return this.time.toLocaleString();
+    currentTime() {
+      return store.time
     },
     towerProgress() {
-      return this.towerFloors.map((tower) => {
-        return Math.floor((tower.floor - 15 + 1) * 100 / 36);
-      });
+      return this.towerFloors.map((tower: Floor) => {
+        return Math.floor(((tower.floor - 15 + 1) * 100) / 36)
+      })
     },
     isEn() {
-      return i18n.global.locale.value === 'en';
+      return i18n.global.locale.value === 'en'
     }
   },
   methods: {
@@ -131,6 +174,9 @@ export default defineComponent({
     getOrnaTitanIconUrl(titan: string) {
       return `${ornaUrl}/static/img/bosses/titan_${titan}.png`
     },
+    firstUpperCase(str: string) {
+      return str.charAt(0).toUpperCase() + str.slice(1)
+    }
   }
 })
 </script>
@@ -170,80 +216,11 @@ export default defineComponent({
   margin: -4px 0 0 0;
 }
 
-@media screen and (max-width: 636px) {
-
-  /* 针对手机设备的样式 */
-  .container {
-    display: table;
-    margin: 0 auto;
-  }
-
-  /* Card Layout */
-  .container>.var-card {
-    break-inside: avoid;
-    margin: 0 auto;
-    margin-bottom: 4px;
-    min-width: var(--card-min-width);
-    width: 75vw;
-    max-width: var(--card-max-width);
-  }
-}
-
-@media screen and (min-width: 636px) {
-
-  /* 针对平板设备的样式 */
-  .container {
-    margin: 0 auto;
-    min-width: 79vw;
-    max-width: 90vw;
-    column-count: 2;
-    column-width: 40vw;
-    column-gap: 4px;
-    column-fill: balance-all;
-  }
-
-  .container>.var-card {
-    break-inside: avoid;
-    margin: 0 auto;
-    margin-bottom: 4px;
-    min-width: var(--card-min-width);
-    width: vw;
-    max-width: var(--card-max-width);
-  }
-}
-
-@media screen and (min-width: 768px) {
-
-  /* 针对桌面设备的样式 */
-  .container {
-    margin: 0 auto;
-    min-width: 660px;
-    max-width: 700px;
-    column-count: 2;
-    column-width: 40px;
-    column-gap: 2px;
-    column-fill: balance-all;
-  }
-}
-
 .titan {
-  background: transparent url("https://playorna.com/static/img/fx/superboss.png") 50% 50% no-repeat;
+  background: transparent url('https://playorna.com/static/img/fx/superboss.png') 50% 50% no-repeat;
   background-size: 130%;
   padding: 2px 2px 2px 2px;
   image-rendering: pixelated;
   background-color: #a0a0a0a0;
-}
-
-.timer-table {
-  overflow-y: auto;
-  white-space: nowrap;
-}
-
-.popup-content {
-  max-height: 90vh;
-  padding: 12px;
-  width: 85vw;
-  max-width: 375px;
-  border-radius: 10px;
 }
 </style>
