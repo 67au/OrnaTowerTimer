@@ -126,6 +126,7 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.towerFloating = new Array(this.towerFloors.length).fill(false)
     watch(
       () => this.timestamp,
       () => {
@@ -139,12 +140,11 @@ export default defineComponent({
         } else {
           store.flag = 1
         }
+        this.towerFloors = getTowerFloors(this.currentTime)
+        this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.currentTime, this.towerDays)
       },
       { immediate: true }
     )
-    this.towerFloors = getTowerFloors(this.currentTime)
-    this.towerFloating = new Array(this.towerFloors.length).fill(false)
-    this.towerFloorsInNextDays = getTowerFloorsInNextDays(this.currentTime, this.towerDays)
   },
   data() {
     return {
